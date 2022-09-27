@@ -47,7 +47,12 @@ public class GcpConnectionFactoryProviderMariadb extends GcpConnectionFactoryPro
         (ConnectionFactoryOptions options) ->
             new MariadbConnectionFactoryProvider().create(options),
         optionBuilder
-            .option(MariadbConnectionFactoryProvider.TCP_KEEP_ALIVE, true),
+            .option(MariadbConnectionFactoryProvider.TCP_KEEP_ALIVE, true)
+            .option(MariadbConnectionFactoryProvider.SSL_CONTEXT_BUILDER_CUSTOMIZER, customizer)
+            .option(MariadbConnectionFactoryProvider.SSL_MODE, SslMode.TUNNEL.toString())
+            //.option(MariadbConnectionFactoryProvider.TCP_NO_DELAY, true)
+        ,
+
         csqlHostName);
   }
 

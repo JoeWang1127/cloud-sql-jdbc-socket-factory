@@ -35,6 +35,7 @@ import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import reactor.core.publisher.Mono;
+import reactor.util.Loggers;
 
 @RunWith(JUnit4.class)
 public class R2dbcMariadbIntegrationTests {
@@ -42,19 +43,13 @@ public class R2dbcMariadbIntegrationTests {
   private static final ImmutableList<String> requiredEnvVars = ImmutableList
       .of("MYSQL_USER", "MYSQL_PASS", "MYSQL_DB", "MYSQL_CONNECTION_NAME");
 
-  // private static final String CONNECTION_NAME = System.getenv("MYSQL_CONNECTION_NAME");
-  // private static final String DB_NAME = System.getenv("MYSQL_DB");
-  // private static final String DB_USER = System.getenv("MYSQL_USER");
-  // private static final String DB_PASSWORD = System.getenv("MYSQL_PASS");
-
-  // TODO, change to env before merging the PR.
-  private static final String CONNECTION_NAME = "joe-experimental-project:us-central1:demo-mysql";
-  private static final String DB_NAME = "mytestdb";
-  private static final String DB_USER = "root";
-  private static final String DB_PASSWORD = "mysql";
+   private static final String CONNECTION_NAME = System.getenv("MYSQL_CONNECTION_NAME");
+   private static final String DB_NAME = System.getenv("MYSQL_DB");
+   private static final String DB_USER = System.getenv("MYSQL_USER");
+   private static final String DB_PASSWORD = System.getenv("MYSQL_PASS");
 
   @Rule
-  public Timeout globalTimeout = new Timeout(20, TimeUnit.SECONDS);
+  public Timeout globalTimeout = new Timeout(20, TimeUnit.MINUTES);
 
   private ConnectionPool connectionPool;
   private String tableName;
@@ -77,6 +72,7 @@ public class R2dbcMariadbIntegrationTests {
     ConnectionFactory connectionFactory = ConnectionFactories.get(r2dbcURL);
     ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration
         .builder(connectionFactory)
+        .maxSize(4)
         .build();
 
     this.connectionPool = new ConnectionPool(configuration);
@@ -106,6 +102,8 @@ public class R2dbcMariadbIntegrationTests {
 
   @Test
   public void pooledConnectionTest() {
+
+
     String insertStmt = String.format("INSERT INTO %s (ID, TITLE) VALUES (?, ?)", this.tableName);
     Mono.from(this.connectionPool.create())
         .flatMapMany(
